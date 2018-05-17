@@ -1,0 +1,16 @@
+,и,ы,е,э,ä,а,у,у_1,о,ъ,ь,ṷ,ў,п,п’,б,б’,ф,ф’,в,в’,м,м’,т,т’,д,д’,с,с’,з,з’,н,н’,л,л’,ц,дз,ш,ш’,ж,ж’,ч’,дж’,р,р’,j,к,к’,г,г’,х,х’,ɣ,ŋ
+son,+,+,+,+,+,+,+,+,+,+,+,+,+,-,-,-,-,-,-,-,-,+,+,-,-,-,-,-,-,-,-,+,+,+,+,-,-,-,-,-,-,-,-,+,+,+,-,-,-,-,-,-,-,+
+voc,+,+,+,+,+,+,+,+,+,+,+,-,-,-,-,-,-,-,-,None,None,-,-,-,-,-,-,-,-,-,-,-,-,+,+,-,-,-,-,-,-,-,-,+,+,-,-,-,-,-,-,-,-,-
+cons,-,-,-,-,-,-,-,-,-,-,-,-,-,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+
+cor,None,None,None,None,None,None,None,None,None,None,None,-,-,-,-,-,-,-,-,-,-,-,-,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,-,-,-,-,-,-,-,-,-
+ant,None,None,None,None,None,None,None,None,None,None,None,-,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,+,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
+high,+,+,-,-,-,-,+,+,-,-,-,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None
+low,-,-,-,-,+,+,-,-,-,-,-,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None
+back,-,+,-,+,-,+,+,-,+,+,-,-,+,+,-,+,-,+,-,+,-,+,-,+,-,+,-,+,-,+,-,+,-,+,-,+,+,+,-,+,-,-,-,+,-,-,+,-,+,-,+,-,+,+
+md,-,-,-,-,-,-,+,+,+,-,-,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None
+tns,+,+,+,+,+,+,+,+,+,-,-,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None
+nsl,None,None,None,None,None,None,None,None,None,None,None,-,-,-,-,-,-,-,-,-,-,+,+,-,-,-,-,-,-,-,-,+,+,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,+
+ltr,None,None,None,None,None,None,None,None,None,None,None,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,+,+,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-
+cont,None,None,None,None,None,None,None,None,None,None,None,+,+,-,-,-,-,+,+,+,+,-,-,-,-,-,-,+,+,+,+,-,-,None,None,-,-,+,+,+,+,-,-,-,-,+,-,-,-,-,+,+,+,-
+drls,None,None,None,None,None,None,None,None,None,None,None,None,None,-,-,-,-,None,None,None,None,-,-,-,-,-,-,None,None,None,None,-,-,None,None,+,+,None,None,None,None,+,+,-,-,None,-,-,-,-,None,None,None,-
+vcd,None,None,None,None,None,None,None,None,None,None,None,None,None,-,-,+,+,-,-,+,+,None,None,-,-,+,+,-,-,+,+,None,None,None,None,-,+,-,-,+,+,-,+,None,None,None,-,-,+,+,-,-,+,None
