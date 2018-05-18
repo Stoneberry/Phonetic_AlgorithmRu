@@ -47,28 +47,36 @@ def __lev_distance__(a, b):
 
     return dis[len(a), len(b)]
 
-
-def phonetic_distance(word1, word2, transcription=False):
+	
+def phonetic_distance(word1, word2, stresses=False, transcription=False):
+    
     """
-	Расстояние между двумя словами на русском языке.
-	Если варинатов транскрипции больше одного - выводятся все вохможные варианты.
-	Если параметр transcription == True, будут выведены еще и сам разбор слов.
+    Расстояние между двумя словами на русском языке.
+    Если варинатов транскрипции больше одного - выводятся все вохможные варианты.
+    Если параметр transcription == True, будут выведены еще и сам разбор слов.
 	
-	>>> phonetic_distance('ехать', 'съехать', transcription=True)
-	[['jехът’', 'сjехът’', 1.0]]
+    >>> phonetic_distance('ехать', 'съехать', transcription=True)
+    [['jехът’', 'сjехът’', 1.0]]
 	
-	>>> phonetic_distance('замок', 'замер', transcription=True)
-	[['замък', 'зам’ьр', 0.6416666666666666],
- 	['замък', 'зам’ер', 0.7666666666666666],
- 	['замок', 'зам’ьр', 0.8916666666666666],
- 	['замок', 'зам’ер', 0.7666666666666666]]
+    >>> phonetic_distance('замок', 'замер', transcription=True)
+    [['замък', 'зам’ьр', 0.6416666666666666],
+    ['замък', 'зам’ер', 0.7666666666666666],
+    ['замок', 'зам’ьр', 0.8916666666666666],
+    ['замок', 'зам’ер', 0.7666666666666666]]
  	
- 	>>> phonetic_distance('замок', 'замок')
- 	[0.0, 0.25, 0.25, 0.0]
+    >>> phonetic_distance('замок', 'замок')
+    [0.0, 0.25, 0.25, 0.0]
 
     """
-	
-    def phonetic_distance(word1, word2, stresses=False, transcription=False):
+
+    if not isinstance(word1, str) or not isinstance(word2, str):
+        raise ValueError('Wrong data type')
+    
+    if word1 == '':
+        return len(word2)
+    
+    if word2 == '':
+        return len(word1)
 
     if stresses:
 
@@ -100,8 +108,8 @@ def phonetic_distance(word1, word2, transcription=False):
         for w2 in word2:
 
             if transcription:
-                answer.append([''.join(w1[0]), ''.join(w2[0]), lev_distance(w1[0], w2[0])])
+                answer.append([''.join(w1[0]), ''.join(w2[0]), __lev_distance__(w1[0], w2[0])])
             else:
-                answer.append(lev_distance(w1[0], w2[0]))
+                answer.append(__lev_distance__(w1[0], w2[0]))
 
     return answer
