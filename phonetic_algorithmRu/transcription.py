@@ -3,8 +3,8 @@ import pandas as pd
 
 
 __data__ = pd.read_csv('phon_data/data.csv', index_col='Unnamed: 0')
-__vows__ = pd.read_csv('phon_data/vows.csv', sep=',', index_col='name')
-__aff__ = pd.read_csv('phon_data/aff_.csv', sep=',', index_col='name')
+__vows__ = pd.read_csv('phon_data/vows.csv', sep=';', index_col='name')
+__aff__ = pd.read_csv('phon_data/aff_.csv', sep=';', index_col='name')
 __cons__ = pd.read_csv('phon_data/cons_.csv', sep=',', index_col='name')
 __st_words__ = pd.read_csv('phon_data/stress_data.csv', index_col='word')
 __stop_words__ = ['а',  'без',  'близ',  'в',  'вне',  'во',  'вокруг',  'вслед',  'для',  'до',  'за',  'и',  'из',
@@ -15,7 +15,7 @@ __stop_words__ = ['а',  'без',  'близ',  'в',  'вне',  'во',  'в�
 
 def __tokenize__(text):
     """
-        Функция удаляет все знаки препинания.
+    Функция удаляет все знаки препинания.
     """
     text = re.sub(r'[^\w\s]', '', text).replace('\n', '')
     text = re.sub(r'[\s]{2,}', ' ', text)
@@ -24,10 +24,10 @@ def __tokenize__(text):
 
 def __num_of_vowls__(word):
     """
-	Функция считает кол-во гласных в слове
+    Функция считает кол-во гласных в слове
 	
-	>>> __num_of_vowls__('мама')
-	2
+    >>> __num_of_vowls__('мама')
+    2
     """
     num = len(re.findall('(а|е|ё|о|и|я|ю|у|ы|э)', word))
     if num:
@@ -38,11 +38,11 @@ def __num_of_vowls__(word):
 
 def __stressed__(word):
     """
-	Функция определяет ударение в слове по словарю.
-	Если слова в словаре нет, выдаются все возможные варианты.
+    Функция определяет ударение в слове по словарю.
+    Если слова в словаре нет, выдаются все возможные варианты.
 	
-	>>> [i for i in stressed('замок', st_words)]
-	[2, 1]
+    >>> [i for i in __stressed__('замок', __st_words__)]
+    [2, 1]
     """
 
     try:
@@ -58,8 +58,8 @@ def __stressed__(word):
         
 
 def __change__(word):
-	"""
-	Замена сочетаний согласных
+    """
+    Замена сочетаний согласных
     """
     word = re.sub('(с|ст|сс|з|зд|ж|ш)ч', 'щ', word)
     word = re.sub('(с|зд|з)щ', 'щ', word)
@@ -73,12 +73,12 @@ def __change__(word):
 
 def __my_type__(letter):
     """
-	Функция определяет тип входного символа: гласная, согласная, знак
+    Функция определяет тип входного символа: гласная, согласная, знак
     """
-    if letter in vows.index:
+    if letter in __vows__.index:
         return 'v'
     
-    if letter in cons.index:
+    if letter in __cons__.index:
         return 'c'
     
     if letter in ('ь', 'ъ'):
@@ -90,7 +90,7 @@ def __my_type__(letter):
 
 def __due_to_vow_table__(ans, index, letter, stress, vow_n, length):
     """
-	Функция преобразует гласные буквы в звуки в зависимости от позиции
+    Функция преобразует гласные буквы в звуки в зависимости от позиции
     """
 
     if vow_n == stress:  # ударный
@@ -104,67 +104,66 @@ def __due_to_vow_table__(ans, index, letter, stress, vow_n, length):
             elif ans.value == 'и':
                 letter = 'ы'
 
-        j(ans, letter, length, index, 'V')
+        __j__(ans, letter, length, index, 'V')
 
     elif index == length - 1:  # начало
-        j(ans, letter, length, index, '#')
+        __j__(ans, letter, length, index, '#')
 
     elif vow_n == stress + 1:  # первый предударный
 
         if ans.next is not None and ans.next.value in ('ц', 'ж', 'ш'):
-            ans.value = vows.loc[letter]['v1_sh']
+            ans.value = __vows__.loc[letter]['v1_sh']
 
         elif letter in ('е', 'ё', 'и', 'ю', 'я'):
-            ans.value = vows.loc[letter]['v1_soft']
+            ans.value = __vows__.loc[letter]['v1_soft']
             ans.next.soft = True
         else:
-            ans.value = vows.loc[letter]['v1_hard']
+            ans.value = __vows__.loc[letter]['v1_hard']
 
     elif vow_n >= stress + 2:  # второй предударный
 
         if ans.next is not None and ans.next.value in ('ц', 'ж', 'ш'):
-            ans.value = vows.loc[letter]['v2_hard']
+            ans.value = __vows__.loc[letter]['v2_hard']
 
         elif ans.next is not None and ans.next.type == 'v':
             if letter in ('е', 'ё', 'и', 'ю', 'я'):
-                ans.value = vows.loc[letter]['v1_soft']
+                ans.value = __vows__.loc[letter]['v1_soft']
             else:
-                ans.value = vows.loc[letter]['v1_hard']
+                ans.value = __vows__.loc[letter]['v1_hard']
 
         elif letter in ('е', 'ё', 'и', 'ю', 'я'):
-            ans.value = vows.loc[letter]['v2_soft']
+            ans.value = __vows__.loc[letter]['v2_soft']
             ans.next.soft = True
         else:
-            ans.value = vows.loc[letter]['v2_hard']
+            ans.value = __vows__.loc[letter]['v2_hard']
 
     elif vow_n < stress:  # заударные
 
         if ans.next is not None and ans.next.value in ('ц', 'ж', 'ш'):
 
-            j(ans, letter, length, index, 'vn_hard')
+            __j__(ans, letter, length, index, 'vn_hard')
 
         elif letter in ('е', 'ё', 'и', 'ю', 'я'):
 
             if vow_n == stress - 1 and ans.next is not None and ans.next.type == 'v':
-                j(ans, letter, length, index, 'vn_soft')
+                __j__(ans, letter, length, index, 'vn_soft')
             else:
-                ans.value = vows.loc[letter]['vn_soft']
+                ans.value = __vows__.loc[letter]['vn_soft']
             ans.next.soft = True
 
         else:
             if vow_n == stress - 1 and ans.next is not None and ans.next.type == 'v':
-                j(ans, letter, length, index, 'vn_hard')
+                __j__(ans, letter, length, index, 'vn_hard')
             else:
-                ans.value = vows.loc[letter]['vn_hard']
-
+                ans.value = __vows__.loc[letter]['vn_hard']
 
 
 def __j__(ans, letter, length, index, position):
     """
-	Функция вставляет й в нужной позиции
+    Функция вставляет й в нужной позиции
     """
 
-    ans.value = vows.loc[letter][position]
+    ans.value = __vows__.loc[letter][position]
 
     if letter in ('ю', 'е', 'ё', 'я'):
 
@@ -175,30 +174,30 @@ def __j__(ans, letter, length, index, position):
             ans.j_ = True
 
             if 'vn' in position:
-                ans.value = vows.loc[letter]['vn_hard']
+                ans.value = __vows__.loc[letter]['vn_hard']
 
         elif ans.next is not None and ans.next.value in ('ь', 'ъ'):
             ans.j_ = True
 
             if 'vn' in position:
-                ans.value = vows.loc[letter]['vn_hard']
+                ans.value = __vows__.loc[letter]['vn_hard']
 
     elif letter in ('и', 'о') and ans.next is not None and ans.next.value == 'ь':
         ans.j_ = True
 
         if 'vn' in position:
-                ans.value = vows.loc[letter]['vn_hard']
+                ans.value = __vows__.loc[letter]['vn_hard']
 
 
 def __cons_tranformer__(ans, letter, vcd=False):
     """
-	Функция преобразует согласные буквы в звуки в зависимости от позиции
+    Функция преобразует согласные буквы в звуки в зависимости от позиции
     """
 	
     a = letter
 
     if letter in ('ч', 'ш', 'щ', 'ж'):
-        ans.value = cons.loc[ans.value]['hard']
+        ans.value = __cons__.loc[ans.value]['hard']
         if ans.__dict__.__contains__('soft'):
             del ans.soft
         if letter in ('ч', 'щ'):
@@ -208,29 +207,29 @@ def __cons_tranformer__(ans, letter, vcd=False):
                 del ans.voice
 
     if ans.__dict__.__contains__('no_voice'):  # оглушение
-        ans.value = cons.loc[ans.value]['no_voice']
+        ans.value = __cons__.loc[ans.value]['no_voice']
 
     elif ans.__dict__.__contains__('voice'):  # озвончение
-        ans.value = cons.loc[ans.value]['voiced']
+        ans.value = __cons__.loc[ans.value]['voiced']
 
     if vcd is True:
         if ans.previous is None:
-            ans.value = cons.loc[ans.value]['voiced']
+            ans.value = __cons__.loc[ans.value]['voiced']
 
     if not vcd:
         if ans.previous is None:  # конец слова
             if ans.next is not None:
                 ans.next.no_voice = True
-            if data[ans.value]['vcd'] == '+':
-                ans.value = cons.loc[ans.value]['no_voice']
+            if __data__[ans.value]['vcd'] == '+':
+                ans.value = __cons__.loc[ans.value]['no_voice']
 
     if ans.next is not None:
-        if ans.value in data.columns and data[ans.value]['vcd'] == '-' and ans.next is not None:  # оглушение следующих
+        if ans.value in __data__.columns and __data__[ans.value]['vcd'] == '-' and ans.next is not None:  # оглушение следующих
 
-            if ans.next.value in data.columns and data[ans.next.value]['son'] == '-':
+            if ans.next.value in __data__.columns and __data__[ans.next.value]['son'] == '-':
                 ans.next.no_voice = True
 
-        elif ans.value in data.columns and data[ans.value]['son'] == '-' and ans.value not in ('в', "в’") and data[ans.value]['vcd'] == '+':  # озвончение слудующих
+        elif ans.value in __data__.columns and __data__[ans.value]['son'] == '-' and ans.value not in ('в', "в’") and __data__[ans.value]['vcd'] == '+':  # озвончение слудующих
             ans.next.voice = True
 
     if ans.previous is not None:
@@ -242,7 +241,7 @@ def __cons_tranformer__(ans, letter, vcd=False):
             ans.value = ''
 
     if ans.__dict__.__contains__('soft'):  # смягчение
-        ans.value = cons.loc[ans.value]['soft']
+        ans.value = __cons__.loc[ans.value]['soft']
 
 
 class Node(object):
@@ -253,7 +252,7 @@ class Node(object):
         self.next = None
 
 
-def transcription(word, stress=1, next_word=False, stop_word=False, separate=True, stop=False, vcd=False):
+def transcription(word, stress=False, next_word=False, separate=True, stop=False, vcd=False, token=False):
 
     """
     Фунция, которая определяет фонетическую транскриацию для
@@ -296,17 +295,20 @@ def transcription(word, stress=1, next_word=False, stop_word=False, separate=Tru
     if not isinstance(stress, int):
         raise ValueError('Wrong data type')
 
-    word = tokenize(word)
+    if word == '':
+        return ''
+
+    word = __tokenize__(word)
 
     if len(word) > 1:
         raise ValueError('Enter a word, not a phrase')
 
     word = word[0]
-    nums = num_of_vowls(word)
+    nums = __num_of_vowls__(word)
 
     if stress:
         if nums < stress or stress < -1:
-            raise ValueError('There are only {} vowel(s)'.format(str(num_of_vowls(word))))
+            raise ValueError('There are only {} vowel(s)'.format(str(__num_of_vowls__(word))))
 
     if not stress:
         stress = nums//2 + 1
@@ -340,7 +342,7 @@ def transcription(word, stress=1, next_word=False, stop_word=False, separate=Tru
 
         if ans.type == 'v':  # гласные
             vow_n += 1
-            due_to_vow_table(ans, index, letter, stress, vow_n, length)
+            __due_to_vow_table__(ans, index, letter, stress, vow_n, length)
             if ans.__dict__.__contains__('j_') and index == 0 and vow_n != stress:
                 special = True
 
@@ -355,7 +357,7 @@ def transcription(word, stress=1, next_word=False, stop_word=False, separate=Tru
             if letter == 'й':
                 ans.value = 'ṷ'
             else:
-                cons_tranformer(ans, letter)
+                __cons_tranformer__(ans, letter)
 
         else:
             raise ValueError('Not Cyrillic')
@@ -381,20 +383,20 @@ def transcription(word, stress=1, next_word=False, stop_word=False, separate=Tru
     return answer[::-1]
 
 
-def phrase_transformer(text, separate=True):
+def phrase_transformer(text, stresses=False, separate=True):
     """
-	Функция трансформирует кириллическую строку в транскрипцию.
-	Функция выдает массив всех возможных вариантов фонетического разбора.
-	Если параметр separate == False, результатом будет массивы отдельных звуков. 
+    Функция трансформирует кириллическую строку в транскрипцию.
+    Функция выдает массив всех возможных вариантов фонетического разбора.
+    Если параметр separate == False, результатом будет массивы отдельных звуков. 
 	
-	>>> phrase_transformer('под')
-	[[['п', 'о', 'т']]]
+    >>> phrase_transformer('под')
+    [[['п', 'о', 'т']]]
 	
-	>>> phrase_transformer('под сосной')
-	[[['п', 'ъ', 'т'], ['с', 'а', 'с', 'н', 'о', 'ṷ']]]
+    >>> phrase_transformer('под сосной')
+    [[['п', 'ъ', 'т'], ['с', 'а', 'с', 'н', 'о', 'ṷ']]]
 	
-	>>> phrase_transformer('под сосной', separate=False)
-	[['път', 'сасноṷ']]
+    >>> phrase_transformer('под сосной', separate=False)
+    [['път', 'сасноṷ']]
     """
 
     def combine(terms, accum):
@@ -412,8 +414,11 @@ def phrase_transformer(text, separate=True):
 
     if not isinstance(text, str):
         raise ValueError('Wrong data type')
+    
+    if text == '':
+        return ''
 
-    words = tokenize(text)
+    words = __tokenize__(text)
 
     if stresses:
         if not isinstance(stresses, list):
@@ -433,14 +438,12 @@ def phrase_transformer(text, separate=True):
 
         stop = False
         vcd = False  # озвончение, если это фраза
-        st = stressed(word, st_words)
 
-        if word in stop_words and length > 1:
+        if word in __stop_words__ and length > 1:
 
             stop = True
-            if index+1 <= len(words)-1 and words[index+1][0] in data.columns and data[words[index+1][0]]['vcd'] == '+':
+            if index+1 <= len(words)-1 and words[index+1][0] in __data__.columns and __data__[words[index+1][0]]['vcd'] == '+':
                 vcd = True
-                print(1)
 
         answer.append([])
 
@@ -452,7 +455,7 @@ def phrase_transformer(text, separate=True):
                 answer[-1].append(transcription(word, stop=stop, vcd=vcd, stress=stresses[index]))
 
         else:
-            for stress in stressed(word, st_words):
+            for stress in __stressed__(word):
 
                 if stress == 'None':
                     if separate is False:
