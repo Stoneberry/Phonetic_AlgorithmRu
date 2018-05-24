@@ -14,6 +14,15 @@ Phonetic algorithm for Russian
 ```
 pip install phonetic-algorithmRu
 ```
+### Импорт
+```
+import phonetic_algorithmRu
+from phonetic_algorithmRu import transcription
+
+>>> transcription.transcription('мама')
+	['м', 'а', 'м', 'ъ']
+```
+
 
 ## Функции модуля transcription
 
