@@ -1,22 +1,31 @@
 import re
+import numpy as np
 import pandas as pd
+import pkg_resources
 
 
-__data__ = pd.read_csv('phon_data/data.csv', index_col='Unnamed: 0')
-__vows__ = pd.read_csv('phon_data/vows.csv', sep=';', index_col='name')
-__aff__ = pd.read_csv('phon_data/aff_.csv', sep=';', index_col='name')
-__cons__ = pd.read_csv('phon_data/cons_.csv', sep=',', index_col='name')
-__st_words__ = pd.read_csv('phon_data/stress_data.csv', index_col='word')
+resource_package = 'phonetic_algorithmRu'
+res = ['distance_matrix.csv', 'data_all.csv', 'vows.csv', 'aff_.csv', 'cons_.csv', 'stress_data.csv']
+paths = ['/'.join(('phon_data', i)) for i in res]
+filenames = [pkg_resources.resource_filename(resource_package, path) for path in paths]
+
+__dist_matrix__ = pd.read_csv(filenames[0], index_col='index')
+__data__ = pd.read_csv(filenames[1], index_col='Unnamed: 0')
+__vows__ = pd.read_csv(filenames[2], index_col='name')
+__aff__ = pd.read_csv(filenames[3], index_col='name')
+__cons__ = pd.read_csv(filenames[4], index_col='name')
+__st_words__ = pd.read_csv(filenames[5], index_col='word')
 __stop_words__ = ['а',  'без',  'близ',  'в',  'вне',  'во',  'вокруг',  'вслед',  'для',  'до',  'за',  'и',  'из',
               	  'изза',  'изо',  'изпод',  'к',  'ко',  'меж',  'между',  'мимо',  'на',  'над',  'о',  'об',  'обо',
               	  'около',  'от',  'ото',  'перед',  'передо',  'по', 'поверх',  'под',  'подо',  'понад',  'после',
              	  'пред',  'при',  'про',  'ради',  'с',  'сверх',  'сверху']
-
+                                               
 
 def __tokenize__(text):
     """
     Функция удаляет все знаки препинания.
     """
+    text = text.lower()
     text = re.sub(r'[^\w\s]', '', text).replace('\n', '')
     text = re.sub(r'[\s]{2,}', ' ', text)
     return text.split(' ')
@@ -117,6 +126,8 @@ def __due_to_vow_table__(ans, index, letter, stress, vow_n, length):
         elif letter in ('е', 'ё', 'и', 'ю', 'я'):
             ans.value = __vows__.loc[letter]['v1_soft']
             ans.next.soft = True
+        elif ans.next is not None and ans.next.value in ('щ', 'ч', 'й'):
+            ans.value = __vows__.loc[letter]['v1_soft']
         else:
             ans.value = __vows__.loc[letter]['v1_hard']
 
@@ -134,6 +145,10 @@ def __due_to_vow_table__(ans, index, letter, stress, vow_n, length):
         elif letter in ('е', 'ё', 'и', 'ю', 'я'):
             ans.value = __vows__.loc[letter]['v2_soft']
             ans.next.soft = True
+
+        elif ans.next is not None and ans.next.value in ('щ', 'ч', 'й'):
+            ans.value = __vows__.loc[letter]['v2_soft']
+
         else:
             ans.value = __vows__.loc[letter]['v2_hard']
 
@@ -150,6 +165,9 @@ def __due_to_vow_table__(ans, index, letter, stress, vow_n, length):
             else:
                 ans.value = __vows__.loc[letter]['vn_soft']
             ans.next.soft = True
+
+        elif ans.next is not None and ans.next.value in ('щ', 'ч', 'й'):
+            ans.value = __vows__.loc[letter]['vn_soft']
 
         else:
             if vow_n == stress - 1 and ans.next is not None and ans.next.type == 'v':
@@ -252,7 +270,7 @@ class Node(object):
         self.next = None
 
 
-def transcription(word, stress=False, next_word=False, separate=True, stop=False, vcd=False, token=False):
+def transcription(word, stress=False, separate=True, stop=False, vcd=False):
 
     """
     Фунция, которая определяет фонетическую транскриацию для
@@ -289,6 +307,7 @@ def transcription(word, stress=False, next_word=False, separate=True, stop=False
     ValueError: There are only 2 vowel(s)
     """
 
+
     if not isinstance(word, str):
         raise ValueError('Wrong data type')
 
@@ -298,6 +317,7 @@ def transcription(word, stress=False, next_word=False, separate=True, stop=False
     if word == '':
         return ''
 
+    word = word.lower()
     word = __tokenize__(word)
 
     if len(word) > 1:
@@ -316,7 +336,6 @@ def transcription(word, stress=False, next_word=False, separate=True, stop=False
     if stop is True:
         stress = -1
 
-    word = word.lower()
     letters = list(__change__(word))[::-1]
 
     ans = Node()
@@ -357,7 +376,7 @@ def transcription(word, stress=False, next_word=False, separate=True, stop=False
             if letter == 'й':
                 ans.value = 'ṷ'
             else:
-                __cons_tranformer__(ans, letter)
+                __cons_tranformer__(ans, letter, vcd=vcd)
 
         else:
             raise ValueError('Not Cyrillic')
@@ -470,3 +489,110 @@ def phrase_transformer(text, stresses=False, separate=True):
 
     combine(answer, [])
     return combinations
+
+def __lev_distance__(a, b):
+
+    """
+	Расстояние Левенштейна для двух транскрипций. 
+	Штраф за перестановки, удаление, вставку символа - 1. 
+	Штраф за замену - расстояние между двумя звуками, вычисляемом по формуле: 
+			1 - S_rows/ C_rows + Unc_rows*2
+    """
+
+    dis = np.zeros((len(a) + 1, len(b) + 1))
+    i = 0
+    row = 0
+    col = 0
+
+    while i < dis.size:
+
+        if row == 0:
+            if col != 0:
+                dis[row, col] = dis[row, col-1] + 1
+
+        elif col == 0:
+            if row != 0:
+                dis[row, col] = dis[row - 1, col] + 1
+
+        elif row > 1 and col > 1 and a[row-1] == b[col-2] and a[row-2] == b[col-1]:
+            dis[row, col] = dis[row - 3][col - 3] + 1
+
+        else:
+            dis[row, col] = np.min([dis[row, col - 1] + 1,  # левый
+                                    dis[row - 1, col - 1] + __dist_matrix__[a[row-1]][b[col-1]],  # диаг      
+                                    dis[row - 1, col] + 1])  # верхний
+
+        col += 1
+        i += 1
+        if col == len(b) + 1:
+            col = 0
+            row += 1
+
+    return dis[len(a), len(b)]
+
+	
+def phonetic_distance(word1, word2, stresses=False, transcription=False):
+    
+    """
+    Расстояние между двумя словами на русском языке.
+    Если варинатов транскрипции больше одного - выводятся все вохможные варианты.
+    Если параметр transcription == True, будут выведены еще и сам разбор слов.
+	
+    >>> phonetic_distance('ехать', 'съехать', transcription=True)
+    [['jехът’', 'сjехът’', 1.0]]
+	
+    >>> phonetic_distance('замок', 'замер', transcription=True)
+    [['замък', 'зам’ьр', 0.6416666666666666],
+    ['замък', 'зам’ер', 0.7666666666666666],
+    ['замок', 'зам’ьр', 0.8916666666666666],
+    ['замок', 'зам’ер', 0.7666666666666666]]
+ 	
+    >>> phonetic_distance('замок', 'замок')
+    [0.0, 0.25, 0.25, 0.0]
+
+    """
+
+    if not isinstance(word1, str) or not isinstance(word2, str):
+        raise ValueError('Wrong data type')
+    
+    if word1 == '':
+        return len(word2)
+    
+    if word2 == '':
+        return len(word1)
+
+    if stresses:
+
+        if not isinstance(stresses, list):
+            raise ValueError('Wrong data type')
+
+        if len(stresses) != 2:
+            raise ValueError('The number of stresses must be the same as the number of words')
+
+        if not all(isinstance(x, int) for x in stresses):
+            raise ValaueError('The stress values type must be int')
+
+        word1 = phrase_transformer(word1, stresses=[(stresses[0])])
+        word2 = phrase_transformer(word2, stresses=[(stresses[1])])
+
+    else:
+        word1 = phrase_transformer(word1)
+        word2 = phrase_transformer(word2)
+
+    if len(word1[0]) > 1:
+        raise ValueError('Enter values must be words, not phrases')
+
+    if len(word1[0]) > 1:
+        raise ValueError('Enter values must be words, not phrases')
+
+    answer = []
+
+    for w1 in word1:
+        for w2 in word2:
+
+            if transcription:
+                answer.append([''.join(w1[0]), ''.join(w2[0]), __lev_distance__(w1[0], w2[0])])
+            else:
+                answer.append(__lev_distance__(w1[0], w2[0]))
+
+    return answer
